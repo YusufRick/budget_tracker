@@ -1,0 +1,751 @@
+<?php
+// Establish database connection
+$host = 'localhost';
+$db_name = 'your_database_name';
+$username = 'your_username';
+$password = 'your_password';
+
+$pdo = new PDO("mysql:host=$host;dbname=$db_name", $username, $password);
+
+if(isset($_POST['submit'])){
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $repassword = $_POST['re_enter_password'];
+    $firstname = $_POST['FirstName'];
+    $lastname = $_POST['LastName'];
+    $email = $_POST['email'];
+    $accountType = $_POST['accountType'];
+    $dob = $_POST['dob'];
+
+    if($username != "" && $password != "" && $repassword != "" && $firstname !="" && $lastname != "" && $email != "" && $accountType != "" && $dob != "") {
+        if ($password == $repassword) {
+            // Prepare the SQL statement
+            $stmt = $pdo->prepare("INSERT INTO account (username, password, email, FirstName, LastName, accountType, dob) 
+                                   VALUES (?, ?, ?, ?, ?, ?, ?)");
+            // Bind parameters
+            $stmt->bindParam(1, $username);
+            $stmt->bindParam(2, $password);
+            $stmt->bindParam(3, $email);
+            $stmt->bindParam(4, $firstname);
+            $stmt->bindParam(5, $lastname);
+            $stmt->bindParam(6, $accountType);
+            $stmt->bindParam(7, $dob);
+            
+            // Execute the statement
+            if ($stmt->execute()) {
+                header("location: registration.php");
+                exit(); // Exit after redirection
+            } else {
+                echo "Something went wrong. Please try again later.";
+            }
+        } else {
+            echo "Passwords do not match.";
+        }
+    } else {
+        echo "Fill in all fields.";
+    }
+}
+?>
+
+
+<?php
+
+
+if(isset($_POST['submit'])){
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $repassword = $_POST['re_enter_password'];
+    $firstname = $_POST['FirstName'];
+    $lastname = $_POST['LastName'];
+    $email = $_POST['email'];
+    $accountType = $_POST['accountType'];
+    $dob = $_POST['dob'];
+
+    if($username != "" && $password != "" && $repassword != "" && $firstname !="" && $lastname != "" && $email != "" && $accountType != "" && $dob != "") {
+        if ($password == $repassword) {
+            $sql = "INSERT INTO account (`username`, `password`, `email`, `FirstName`, `LastName`, `accountType`, `dob`) 
+                    VALUES ('$username', '$password', '$email', '$firstname', '$lastname', '$accountType', '$dob')";
+            if (mysqli_query($pdo, $sql)) {
+                header("location: registration.php");
+                exit(); // Exit after redirection
+            } else {
+                echo "Something went wrong. Please try again later.";
+            }
+        } else {
+            echo "Passwords do not match.";
+        }
+    } else {
+        echo "Fill in all fields.";
+    }
+}
+?>
+
+
+<?php
+
+// Enable error reporting for debugging purposes
+
+error_reporting(E_ALL);
+
+ini_set('display_errors', 1);
+
+// Include database connection
+
+include('includes/config.php');
+
+// Check if the form has been submitted
+
+ 
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+ 
+   $user = $_POST["username"];
+   $email = $_POST["email"];
+   $password = $_POST["password"];
+   $passwordRepeat = $_POST["re_enter_password"];
+   $firstname = $_POST['FirstName'];
+    $lastname = $_POST['LastName'];
+    $accountType = $_POST['accountType'];
+    $dob = $_POST['dob'];
+
+ 
+
+   $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+   $errors = array();
+
+ 
+   // Basic validation
+
+ 
+
+   if (empty($user) || empty($email) || empty($password) || empty($passwordRepeat) || empty($firstname) || empty($lastname) || empty($accountType) || empty($dob)) {
+       array_push($errors, "All fields are required");
+       header("Location:../index.php");
+       die();
+   }
+
+
+   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+       array_push($errors, "Email is not valid");
+       header("Location:../index.php");
+       die();
+
+   }
+
+ 
+
+   if (strlen($password) < 8) {
+
+       array_push($errors, "Password must be at least 8 characters long");
+       header("Location:../index.php");
+       die();
+   }
+
+ 
+
+   if ($password !== $passwordRepeat) {
+
+      array_push($errors, "Passwords do not match");
+      header("Location:../index.php");
+      die();
+
+   }
+
+  
+
+   if (count($errors) == 0) {
+
+ 
+
+       $sql = "INSERT INTO account (username, password,account_Type, first_Name, last_Name, dob, email) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+ 
+
+       $stmt = mysqli_stmt_init($conn);
+
+ 
+
+       if (!mysqli_stmt_prepare($stmt, $sql)) {
+           die("SQL statement preparation failed: " . mysqli_stmt_error($stmt));
+
+       } else {
+
+           mysqli_stmt_bind_param($stmt, "sssssss", $user, $email, $passwordHash,$firstname,$lastname,$dob,$accountType);
+
+           if (mysqli_stmt_execute($stmt)) {
+    
+               echo "<div class='alert alert-success'>You are registered successfully.</div>";
+               echo '<a href="registration.php">back</a>';
+
+           } else {
+               die("Error executing statement: " . mysqli_stmt_error($stmt));
+
+           }
+
+       }
+
+   } else {
+
+       // Display errors
+
+       foreach ($errors as $error) {
+           echo "<div class='alert alert-danger'>$error</div>";
+
+       }
+
+ 
+
+   }
+
+ 
+
+}
+
+ 
+
+?>
+
+
+
+<?php
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+ 
+$date = $_POST["date"];
+$amount = $_POST["amount"];
+$description = $_POST["description"];
+$category = $_POST["category"];
+
+}
+$errors = array();
+
+if (empty($date) || empty($amount) || empty($description) || empty($category)) {
+    array_push($errors, "All fields are required");
+    header("Location:../expense.php");
+    die();
+}
+
+
+
+if (count($errors) == 0) {
+
+ 
+
+    $sql = "INSERT INTO expense (date, amount,description,category) VALUES (?, ?, ?, ?)";
+
+
+
+    $stmt = mysqli_stmt_init($conn);
+
+
+
+    if (!mysqli_stmt_prepare($stmt, $sql)) {
+        die("SQL statement preparation failed: " . mysqli_stmt_error($stmt));
+
+    } else {
+
+        mysqli_stmt_bind_param($stmt, "ssss", $date, $amount, $description,$category);
+
+        if (mysqli_stmt_execute($stmt)) {
+ 
+            echo "<div class='alert alert-success'>Expense is added.</div>";
+            echo '<a href="expense.php">back</a>';
+
+        } else {
+            die("Error executing statement: " . mysqli_stmt_error($stmt));
+
+        }
+
+    }
+
+} else {
+
+    // Display errors
+
+    foreach ($errors as $error) {
+        echo "<div class='alert alert-danger'>$error</div>";
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+?>
+
+// total spending
+
+
+!DOCTYPE html>
+<html lang="en">
+<?php
+// Include the database configuration file
+include 'includes/config.php';
+?>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <title>Expense</title>
+    <style>
+        .add-button {
+            text-align: center;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <?php
+    // Include the header file
+    include 'includes/header.php';
+    session_start();
+    ?>
+
+    <div class="container mt-4">
+
+        <h1> <?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'test'; ?> </h1>
+
+        <!-- Month selection dropdown -->
+        <div class="col-sm-6">
+            <form action="" method="post"> <!-- Add form tag -->
+                <select name="month" class="form-control" required>
+                    <option value="">Month</option>
+                    <option value="january">JANUARY</option>
+                    <option value="february">FEBRUARY</option>
+                    <option value="march">MARCH</option>
+                    <option value="april">APRIL</option>
+                    <option value="may">MAY</option>
+                    <option value="june">JUNE</option>
+                    <option value="july">JULY</option>
+                    <option value="august">AUGUST</option>
+                    <option value="september">SEPTEMBER</option>
+                    <option value="october">OCTOBER</option>
+                    <option value="november">NOVEMBER</option>
+                    <option value="december">DECEMBER</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Submit</button> <!-- Add submit button -->
+            </form>
+        </div>
+
+
+    </div>
+
+
+    <div class="container">
+        <h2 class="expense-heading">Total Spending</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Balance</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+            $username = isset($_SESSION['username']) ? $_SESSION['username'] : null;
+
+if ($username) {
+    // Get the selected month from the dropdown
+    $selectedMonth = isset($_POST['month']) ? $_POST['month'] : null;
+
+    if ($selectedMonth) {
+        // Query to get the budget for the selected month
+        $budgetQuery = "SELECT budget FROM monthly_budget WHERE month = ?";
+        $budgetStmt = mysqli_prepare($conn, $budgetQuery);
+        mysqli_stmt_bind_param($budgetStmt, "s", $selectedMonth);
+        mysqli_stmt_execute($budgetStmt);
+        $budgetResult = mysqli_stmt_get_result($budgetStmt);
+        $budgetRow = mysqli_fetch_assoc($budgetResult);
+        $monthlyBudget = $budgetRow ? $budgetRow['budget'] : 0;
+
+        // Query to get the total expenses for the selected month
+        $expenseQuery = "SELECT e.date, ec.category_name, e.amount, e.description 
+                         FROM expense AS e
+                         INNER JOIN expense_category AS ec ON e.category_id = ec.category_id
+                         INNER JOIN account AS a ON e.account_id = a.account_id
+                         WHERE MONTH(e.date) = MONTH(CURDATE()) AND YEAR(e.date) = YEAR(CURDATE()) AND a.username = ?";
+        $expenseStmt = mysqli_prepare($conn, $expenseQuery);
+        mysqli_stmt_bind_param($expenseStmt, "s", $username);
+        mysqli_stmt_execute($expenseStmt);
+        $expenseResult = mysqli_stmt_get_result($expenseStmt);
+
+        if ($expenseResult && mysqli_num_rows($expenseResult) > 0) {
+            while ($row = mysqli_fetch_assoc($expenseResult)) {
+                // Calculate the balance for each row
+                $balance = $monthlyBudget - $row['amount'];
+
+                // Output the expenses for the selected month along with the calculated balance
+                echo '
+                    <tr>
+                        <td>' . $row['date'] . '</td>
+                        <td>' . $row['category_name'] . '</td>
+                        <td>' . $row['amount'] . '</td>
+                        <td>' . $row['description'] . '</td>
+                        <td>' . $balance . '</td> <!-- Output balance here --> 
+                    </tr>';
+            }
+        } else {
+            echo "<tr><td colspan='5'>No expenses found for the selected month.</td></tr>";
+        }
+    } else {
+        echo "<tr><td colspan='5'>No month selected.</td></tr>";
+    }
+} else {
+    echo "<tr><td colspan='5'>Username not found in session.</td></tr>";
+}
+?>
+            </tbody>
+
+        </table>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js">
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true
+            });
+        });
+    </script>
+
+</body>
+
+
+</html>
+
+
+<?php
+$host = 'localhost';
+$db_name = 'db_sp';
+$username = 'root';
+$password = '';
+
+$pdo = new PDO("mysql:host=$host;dbname=$db_name", $username, $password);
+
+if(isset($_POST['submit'])){
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $repassword = $_POST['re_enter_password'];
+    $firstname = $_POST['FirstName'];
+    $lastname = $_POST['LastName'];
+    $email = $_POST['email'];
+    $accountType = $_POST['accountType'];
+    $dob = $_POST['dob'];
+
+    if($username != "" && $password != "" && $repassword != "" && $firstname !="" && $lastname != "" && $email != "" && $accountType != "" && $dob != "") {
+        if ($password == $repassword) {
+            // Prepare the SQL statement
+            $stmt = $pdo->prepare("INSERT INTO account (username,password, email, FirstName, LastName, accountType, dob) 
+                                   VALUES (?, ?, ?, ?, ?, ?, ?)");
+            // Bind parameters
+            $stmt->bindParam(1, $username);
+            $stmt->bindParam(2, $password);
+            $stmt->bindParam(3, $email);
+            $stmt->bindParam(4, $firstname);
+            $stmt->bindParam(5, $lastname);
+            $stmt->bindParam(6, $accountType);
+            $stmt->bindParam(7, $dob);
+            
+            // Execute the statement
+            if ($stmt->execute()) {
+                header("location: registration.php");
+                exit(); // Exit after redirection
+            } else {
+                echo "Something went wrong. Please try again later.";
+            }
+        } else {
+            echo "Passwords do not match.";
+        }
+    } else {
+        echo "Fill in all fields.";
+    }
+}
+?>
+
+<!DOCTYPE html>
+
+<?php
+
+include 'includes/config.php'
+
+?>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+</head>
+<body>
+
+<form action="includes/add.php" method="post">
+
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="password" name="re_enter_password" placeholder="Re-enter password" required>
+    <input type="text" name="FirstName" placeholder="First Name" required>
+    <input type="text" name="LastName" placeholder="Last Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    
+    <input type="text" name="dob" placeholder="Date Of Birth" class="datepicker" required>
+    <select name="accountType" id="accType" class="form-control" required>
+        <option value="">Select account type</option>
+        <option value="student">Student</option>
+        <option value="professional">Professional</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Register</button>
+
+</form>
+
+<!-- Include jQuery and Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Include Bootstrap Datepicker JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<!-- Initialize Datepicker -->
+<script>
+    $(document).ready(function(){
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true
+        });
+    });
+</script>
+
+</body>
+</html>
+<a href=""></a>
+
+
+
+// total_spending
+
+<!DOCTYPE html>
+<?php
+session_start();
+$username = isset($_SESSION['username']) ? $_SESSION['username'] : null;
+include 'includes/config.php'
+?>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <title>Total Spending</title>
+    <style>
+        .add-button {
+            text-align: center;
+        }
+        .heading{
+            margin:auto;
+            justify-content:center;
+            display:flex;
+        }
+
+    .spending{
+
+        display:flex;
+        justify-content:center;
+    }
+
+    .container2{
+
+        height:500px;
+        width:500px;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        margin:auto;
+
+
+    }
+    .container3{
+        display:flex;
+        justify-content:space-around;
+    }
+    </style>
+</head>
+<body>
+
+<?php
+include 'includes/header.php';
+?>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form action="" method="post">
+                <div class="input-group mb-3">
+                    <select name="month" class="form-select" required>
+                        <option value="">MONTH</option>
+                        <option value="1">JANUARY</option>
+                        <option value="2">FEBRUARY</option>
+                        <option value="3">MARCH</option>
+                        <option value="4">APRIL</option>
+                        <option value="5">MAY</option>
+                        <option value="6">JUNE</option>
+                        <option value="7">JULY</option>
+                        <option value="8">AUGUST</option>
+                        <option value="9">SEPTEMBER</option>
+                        <option value="10">OCTOBER</option>
+                        <option value="11">NOVEMBER</option>
+                        <option value="12">DECEMBER</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="container mt-4">
+    <table class="table table-bordered">
+        <thead class ="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+        <?php
+        if(isset($_SESSION['username']) && isset($_POST['month'])) {
+            $username = $_SESSION['username'];
+            $month = $_POST['month'];
+            
+            // fetch monthly budget
+            $sql_budget = "SELECT budget FROM monthly_budget WHERE account_id IN (SELECT account_id FROM account WHERE username = ?) AND month = ?";
+            $stmt_budget = $conn->prepare($sql_budget);
+            $stmt_budget->bind_param("ss", $username, $month);
+            $stmt_budget->execute();
+            $result_budget = $stmt_budget->get_result();
+            
+            if ($result_budget && $result_budget->num_rows > 0) {
+                $budget_row = $result_budget->fetch_assoc();
+                $monthly_budget = $budget_row['budget'];
+            
+                $expense_query = "SELECT *, e.description,e.date, ec.category_name, SUM(e.amount) AS total_amount
+                                  FROM expense AS e
+                                  INNER JOIN expense_category AS ec ON e.category_id = ec.category_id
+                                  INNER JOIN account AS a ON e.account_id = a.account_id
+                                  WHERE a.username = ? AND MONTH(e.date) = ?
+                                  GROUP BY ec.category_name";
+                $expense_statement = $conn->prepare($expense_query);
+                $expense_statement->bind_param("ss", $username, $month);
+                $expense_statement->execute();
+                $expense_result = $expense_statement->get_result();
+
+
+                if ($expense_result && $expense_result->num_rows > 0) {
+                    $sql = "SELECT SUM(amount) AS total_expense FROM expense WHERE account_id IN (SELECT account_id FROM account WHERE username = ?) AND MONTH(date) = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("ss", $username, $month);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $row = $result->fetch_assoc();
+                    $total_spending = $row['total_expense'];
+                    echo'<div class="container3">'.'<h2 class="spending"> Monthly Budget: '. $monthly_budget . '</h2>';
+                    echo '<h2 class="spending">Total Spending: ' . $total_spending . '</h2>' . '</div>';
+                
+                    if ($expense_result && $expense_result->num_rows > 0) {
+                        $categories = array();
+                        $amounts = array();
+                        $current= $monthly_budget;
+                        while($row = $expense_result->fetch_assoc()) {
+                            $categories[] = $row['category_name'];
+                            $amounts[] = $row['total_amount'];
+                            $date[]=$row['date'];
+                            $current_balance = $current - $row['total_amount'];
+                            $current = $current_balance;
+                        
+                            echo '
+                                <tr>
+                                    <td>' . $row['date'] . '</td>
+                                    <td>' . $row['category_name'] . '</td>
+                                    <td>' . $row['total_amount'] . '</td>  
+                                    <td>'. $row['description'] .'</td>
+                                    <td>'. $current_balance . '</td>
+                                </tr>';
+                        }
+                    }
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container2 mt-4 text-center">
+                <canvas id="myChart"></canvas>
+            </div>
+            <?php
+                echo '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
+                echo '<script>';
+                echo 'var ctx = document.getElementById("myChart").getContext("2d");';
+                echo 'var myChart = new Chart(ctx, {';
+                echo 'type: "pie",';
+                echo 'data: {';
+                echo 'labels: ' . json_encode($categories) . ',';
+                echo 'datasets: [{';
+                echo 'label: "Total Spending by Category",';
+                echo 'data: ' . json_encode($amounts) . ',';
+                echo 'backgroundColor: [';
+                // Generating random colors for each category
+                for ($i = 0; $i < count($categories); $i++) {
+                    echo '"' . sprintf('#%06X', mt_rand(0, 0xFFFFFF)) . '",';
+                }
+                echo ']';
+                echo '}],';
+                echo '},';
+                echo 'options: {';
+                echo 'legend: { display: true },';
+                echo '}';
+                echo '});';
+                echo '</script>';
+                echo ''
+                ?>
+                <?php
+                } else {
+                    echo '<tr><td colspan="5">No expenses found for the selected month.</td></tr>';
+                }
+            } else {
+                echo '<tr><td colspan="5">No budget found for the selected month.</td></tr>';
+            }
+        } else {
+            echo '<tr><td colspan="5">Month not selected.</td></tr>';
+        }
+        ?>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
+
